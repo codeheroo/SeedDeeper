@@ -15,31 +15,31 @@ def generate_private_key(seed, derivation_path):
     return private_key
 
 if __name__ == "__main__":
-    text = "Enter deep: "
+    text = "Enter deep (-1 to exit): "
+    while True:
+        derivation_path = f"m/44'/60'/0'/0/{input(text)}"
+        if (derivation_path == "m/44'/60'/0'/0/-1"):
+            exit(1)
+        try:
+            with open('seeds.txt', 'r') as f:
+                seeds = f.read().splitlines()
+        except FileNotFoundError:
+            print("Error: 'seeds.txt' file not found.")
+            exit(1)
 
-    derivation_path = f"m/44'/60'/0'/0/{input(text)}"
 
+        with open('privatekeys.txt', 'a') as f_out:
 
-    try:
-        with open('seeds.txt', 'r') as f:
-            seeds = f.read().splitlines()
-    except FileNotFoundError:
-        print("Error: 'seeds.txt' file not found.")
-        exit(1)
+            for seed in seeds:
 
+                if not seed.strip():
+                    continue
+                try:
 
-    with open('privatekeys.txt', 'w') as f_out:
+                    private_key = f"0x{generate_private_key(seed.strip(), derivation_path)}"
 
-        for seed in seeds:
+                    f_out.write(f"{private_key}\n")
+                except Exception as e:
+                    print(f"Error processing seed: '{seed}'. Exception: {e}")
 
-            if not seed.strip():
-                continue
-            try:
-
-                private_key = f"0x{generate_private_key(seed.strip(), derivation_path)}"
-
-                f_out.write(f"{private_key}\n")
-            except Exception as e:
-                print(f"Error processing seed: '{seed}'. Exception: {e}")
-
-    print("Private keys have been generated and saved to 'privatekeys.txt'.")
+        print("Private keys have been generated and saved to 'privatekeys.txt'.")
